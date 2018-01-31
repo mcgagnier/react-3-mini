@@ -2,9 +2,10 @@ import React, { Component } from 'react';
 import logo from './mainStreetAuto.svg';
 import axios from 'axios';
 import './App.css';
-
 // Toast notification dependencies
 import { ToastContainer, toast } from 'react-toastify';
+
+const baseUrl = 'https://joes-autos.herokuapp.com/api';
 
 class App extends Component {
   constructor( props ) {
@@ -29,8 +30,16 @@ class App extends Component {
   }
 
   getVehicles() {
-    // axios (GET)
-    // setState with response -> vehiclesToDisplay
+    axios({
+      method: "GET",
+      url: baseUrl + '/vehicles'
+    }).then(response => {
+      this.setState({ vehiclesToDisplay: response.data });
+      toast.success("Got Vehicles");
+    })
+    .catch(error => {
+      toast.error("This was the error", error);
+    })
   }
 
   getPotentialBuyers() {
@@ -39,6 +48,18 @@ class App extends Component {
   }
 
   sellCar( id ) {
+    axios({
+      method: 'delete',
+      url: `${baseUrl}/vehicles/${ id }`,
+    }).then(results => {
+      console.log(results);
+      this.setState({vehiclesToDisplay: results.data.vehicles});
+      toast.success("vehicle sold");
+    })
+    .catch(error => {
+        toast.error("No vehicle sold", error);
+        console.log(error);
+    })
     // axios (DELETE)
     // setState with response -> vehiclesToDisplay
   }
@@ -58,9 +79,18 @@ class App extends Component {
   }
 
   updatePrice( priceChange, id ) {
-    // axios (PUT)
-    // setState with response -> vehiclesToDisplay
-  }
+    axios({
+      method: 'put',
+      url: `${baseUrl}/vehicles/${id}/${priceChange}`
+    }).then(results => {
+      console.log(results);
+      this.setState({vehiclesToDisplay: results.data.vehicles});
+      toast.success("price updated");
+    })
+    .catch(error => {
+        toast.error("Price Error", error);
+  })
+}
 
   addCar() {
     let newCar = {
@@ -70,10 +100,22 @@ class App extends Component {
       year: this.refs.year.value,
       price: this.refs.price.value
     };
-
-    // axios (POST)
-    // setState with response -> vehiclesToDisplay
+    axios({
+      method: 'post',
+      url: `${baseUrl}/vehicles/`,
+      data: newCar
+    }).then(results => {
+      console.log(results);
+      this.setState({vehiclesToDisplay: results.data.vehicles});
+      toast.success("vehicle added");
+    })
+    .catch(error => {
+        toast.error("No vehicle added", error);
+        console.log(error);
+    })
   }
+ 
+
 
   addBuyer() {
     let newBuyer ={
